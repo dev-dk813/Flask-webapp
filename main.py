@@ -17,9 +17,13 @@ login_manager = LoginManager()
 login_manager.login_view = 'login'
 login_manager.init_app(app)
 
+def get_user(user_id):
+    user = User.query.filter_by(id=user_id).first()
+    return user
+
 @login_manager.user_loader
 def load_user(id):
-    return User.query.get(int(id))
+    return User.query.get(id)
 
 db = SQLAlchemy(app)
 
@@ -31,10 +35,15 @@ class Note(db.Model):
 
 class User(db.Model , UserMixin):
     id= db.Column(db.Integer, primary_key= True)
-    email= db.Column(db.String(150), index=True, unique=True)
+    email= db.Column(db.String(150), unique=True)
     password= db.Column(db.String(150))
-    first_name= db.Column(db.String(150), index=True, unique=True)
+    first_name= db.Column(db.String(150), unique=True)
     notes= db.relationship('Note')
+
+    def is_active(self):
+        """True, as all users are active."""
+        return True
+    
 
 @app.route("/", methods=['GET', 'POST'])
 @login_required
@@ -87,21 +96,26 @@ def sign_up():
         #     flash('Email must be greater than 4 characters.', category="error")
         # elif len(first_name) < 2:
         #     flash('Name must be greater than 1 characters.', category="error")
-        user = User.query.filter_by(email=email, first_name=first_name).first()
+        user = User.query.filter_by(email=email).first()
         if user:
-            flash('Email already exists', category="error")
+            flash('Email already exists.', category="error")
         elif password1 != password2:
             flash('Passwords doesn\'t match.', category="error")
         elif len(password1) < 6:
             flash('Password must be atleast 7 characters.', category="error")
         else:
-            new_user = User(email=email, password= generate_password_hash(password1, method='sha256'), first_name=first_name)
+            new_user = User(email=email, first_name=first_name, password= generate_password_hash(password1, method='sha256'))
             db.session.add(new_user)
             db.session.commit()
-            login_user(user, remember=True)
+            login_user(new_user, remember=True)
             flash('Account created!', category="success")
-            return redirect('/')
+            return redirect('/') 
     return render_template("sign_up.html", user= current_user)
+
+@app.route("/about/")
+def about():
+    user = User.query.filter_by().first()
+    return render_template("about.html", user=user)
 
 @app.route("/delete-note", methods=['POST'])
 def delete_data():
@@ -114,12 +128,6 @@ def delete_data():
             db.session.commit()
 
     return jsonify({})
-
-# def create_database(app):
-#     if not path.exists('DB_NAME'):
-#     db.create_all(app=app)
-#         print("Created Database!")
-
 
 if __name__=="__main__":
     app.run(debug=True)
