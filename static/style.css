@@ -1,0 +1,22 @@
+div{
+    font-family: rockwell;
+}
+
+body{
+    background-image: url('/static/7c7c8bf2-1189-4250-8a2b-5eb9cfc63ff4.jpg');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 100%;
+}
+.bg-dark{
+    color: white;
+    background-image: url('/static/footer.jpg');
+    background-blend-mode: darken;
+}
+.bgm{
+    color: azure;
+    background-color: #052834;
+    border: 2px solid black;
+    border-radius: 15px;
+}
+
